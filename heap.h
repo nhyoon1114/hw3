@@ -2,6 +2,7 @@
 #define HEAP_H
 #include <functional>
 #include <stdexcept>
+#include <vector>
 
 template <typename T, typename PComparator = std::less<T> >
 class Heap
@@ -61,14 +62,51 @@ public:
 
 private:
   /// Add whatever helper functions and data members you need below
-
-
-
-
+  std::vector<T> data;
+  int ary;
+  PComparator comp;
 };
 
 // Add implementation of member functions here
 
+template <typename T, typename PComparator>
+Heap<T, PComparator>::Heap(int m, PComparator c) 
+{
+  ary = m;
+  comp = c;
+}
+
+template <typename T, typename PComparator>
+Heap<T, PComparator>::~Heap() 
+{
+
+}
+
+template <typename T, typename PComparator>
+bool Heap<T, PComparator>::empty() const {
+  return data.empty();
+}
+
+template <typename T, typename PComparator>
+size_t Heap<T, PComparator>::size() const {
+  return data.size();
+}
+
+template <typename T, typename PComparator>
+void Heap<T, PComparator>::push(const T& item) {
+    data.push_back(item);
+    std::size_t index = data.size() - 1;
+    while (index != 0) {
+        std::size_t parent_index = (index - 1) / ary;
+        T& current = data[index];
+        T& parent = data[parent_index];
+        if (!comp(current, parent)) {
+            break;
+        }
+        std::swap(current, parent);
+        index = parent_index;
+    }
+}
 
 // We will start top() for you to handle the case of 
 // calling top on an empty heap
@@ -81,13 +119,13 @@ T const & Heap<T,PComparator>::top() const
     // ================================
     // throw the appropriate exception
     // ================================
-
+    throw std::underflow_error("underflow");
 
   }
   // If we get here we know the heap has at least 1 item
   // Add code to return the top element
-
-
+   
+  return data[0];
 
 }
 
@@ -101,11 +139,34 @@ void Heap<T,PComparator>::pop()
     // ================================
     // throw the appropriate exception
     // ================================
-
-
+    throw std::underflow_error("underflow");
   }
 
+  T& top = data[0];
+  T& bottom = data.back();
+  std::swap(top, bottom);
+  data.pop_back();
+  size_t parent = 0;
+  while (parent <= data.size() / ary) {
+    size_t firstChild = ary * (parent + 1) - (ary - 1);
+    size_t lastChild = firstChild + ary - 1;
+    size_t bestItem = parent;
 
+    for (size_t child = firstChild; child <= lastChild; child++) {
+      if (child < data.size()) {
+        if (comp(data[child], data[bestItem])) {
+          bestItem = child;
+        }
+      }
+    }
+    if (parent != bestItem) {
+      std::swap(data[parent], data[bestItem]);
+      parent = bestItem;
+    }
+    else {
+      break;
+    }
+  }
 
 }
 
